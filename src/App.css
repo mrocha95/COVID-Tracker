@@ -1,4 +1,4 @@
-.App {
+/* .App {
   text-align: center;
 }
 
@@ -35,4 +35,21 @@
   to {
     transform: rotate(360deg);
   }
+} */
+
+/* .chart {
+  width: 100px;
+} */
+
+.Historical {
+  width: 30vw;
+  height: 600px;
+  display: flex;
+  flex-direction: row;
+}
+
+.News {
+  width: 10vw;
+  display: flex;
+  flex-direction: row;
 }
