@@ -1,26 +1,20 @@
 import React from "react";
 import axios from "axios";
-import { Swiper, SwiperSlide } from "swiper";
+import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Navigation } from "swiper";
+
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
 
 function News() {
   const [news, setNews] = React.useState([]);
-
-  //   const options = {
-  //     method: "GET",
-  //     url: "https://covid-19-news.p.rapidapi.com/v1/covid",
-  //     params: { q: "covid", lang: "en", media: "True" },
-  //     headers: {
-  //       "X-RapidAPI-Key": "c5d9e92318mshbdf74a4399e20e7p10cf47jsna24ac16729ea",
-  //       "X-RapidAPI-Host": "covid-19-news.p.rapidapi.com",
-  //     },
-  //   };
 
   const options = {
     method: "GET",
     url: "https://vaccovid-coronavirus-vaccine-and-treatment-tracker.p.rapidapi.com/api/news/get-coronavirus-news/0",
     headers: {
-      "X-RapidAPI-Key": "c5d9e92318mshbdf74a4399e20e7p10cf47jsna24ac16729ea",
+      "X-RapidAPI-Key": process.env.REACT_APP_NEWS_API,
       "X-RapidAPI-Host":
         "vaccovid-coronavirus-vaccine-and-treatment-tracker.p.rapidapi.com",
     },
@@ -29,7 +23,6 @@ function News() {
   const getNews = async () => {
     const response = await axios.request(options);
     let uniqueNews = [...response.data.news];
-    // console.log(response.data.news);
     for (let i = 0; i < uniqueNews.length; i++) {
       for (let j = i + 1; j < uniqueNews.length; j++) {
         if (uniqueNews[i].title === uniqueNews[j].title) {
@@ -38,7 +31,6 @@ function News() {
       }
     }
     for (let i = 0; i < uniqueNews.length; i++) {
-      console.log(uniqueNews[i].content);
       uniqueNews[i].title = uniqueNews[i].title.replace("&#8216;", "");
       uniqueNews[i].title = uniqueNews[i].title.replace("&#8217;", "");
       uniqueNews[i].content = uniqueNews[i].content.split("[")[0];
@@ -47,7 +39,6 @@ function News() {
         ""
       );
     }
-    console.log(uniqueNews);
     setNews(uniqueNews);
   };
 
@@ -58,10 +49,10 @@ function News() {
   return (
     <div className="News">
       <Swiper
-        slidesPerView={3}
+        slidesPerView={4}
         spaceBetween={30}
-        slidesPerGroup={3}
-        loop={true}
+        slidesPerGroup={4}
+        loop={false}
         loopFillGroupWithBlank={true}
         pagination={{
           clickable: true,
@@ -73,25 +64,33 @@ function News() {
         {news.map(function (el) {
           return (
             <SwiperSlide>
-              <table>
-                <tr>
+              <div className="card">
+                <a
+                  href={el.link}
+                  style={{ textDecoration: "none", color: "black" }}
+                >
                   <img
                     src={el.urlToImage}
                     alt="new"
-                    width="180px"
+                    width="200px"
                     height="120px"
                   />
-                </tr>
-                <tr>
                   <h3>{el.title}</h3>
-                </tr>
-                <tr>
                   <p>{el.content}</p>
-                </tr>
-                <tr>
-                  <p>{el.pubDate}</p>
-                </tr>
-              </table>
+                  <p>
+                    {Math.floor(
+                      (Date.now() - Date.parse(el.pubDate)) * 2.7778 * 10 ** -7
+                    ) === 1
+                      ? "1 hour "
+                      : Math.floor(
+                          (Date.now() - Date.parse(el.pubDate)) *
+                            2.7778 *
+                            10 ** -7
+                        ) + " hours "}
+                    ago
+                  </p>
+                </a>
+              </div>
             </SwiperSlide>
           );
         })}

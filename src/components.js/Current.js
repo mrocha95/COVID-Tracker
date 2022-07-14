@@ -6,13 +6,11 @@ import Historical from "./Historical";
 function Current() {
   const [allData, setAllData] = React.useState([]);
 
-  const [worldStats, setWorldStats] = React.useState([]);
-
-  const [contArr, setContArr] = React.useState(["Continents"]);
+  const [contArr, setContArr] = React.useState(["All"]);
   const [continent, setContinent] = React.useState("");
 
-  const [countryArr, setCountryArr] = React.useState(["Countries"]);
-  const [country, setCountry] = React.useState("");
+  const [countryArr, setCountryArr] = React.useState(["All"]);
+  const [country, setCountry] = React.useState([]);
 
   const options = {
     method: "GET",
@@ -28,7 +26,7 @@ function Current() {
     let continents = [];
     const response = await axios.request(options);
     setAllData(response.data.response);
-    setWorldStats(
+    setCountry(
       response.data.response.filter(function (el) {
         return el.continent === "All";
       })
@@ -60,44 +58,80 @@ function Current() {
   }, []);
 
   const handleContChange = (e) => {
+    let countries = [];
     setContinent(e.target.value);
-    let filteredCountries = allData.filter(function (data) {
-      return data.continent === e.target.value;
-    });
-    let countryNames = filteredCountries.map((el) => el.country);
-    setCountryArr(countryNames);
+    if (e.target.value === "All") {
+      for (let i = 0; i < allData.length; i++) {
+        countries.push(allData[i].country);
+      }
+      countries.splice(countries.indexOf("All"), 1);
+      countries.splice(countries.indexOf("Africa"), 1);
+      countries.splice(countries.indexOf("Asia"), 1);
+      countries.splice(countries.indexOf("Oceania"), 1);
+      countries.splice(countries.indexOf("North-America"), 1);
+      countries.splice(countries.indexOf("South-America"), 1);
+      countries.splice(countries.indexOf("Europe"), 1);
+      countries.sort();
+      setCountryArr(["All"].concat(countries));
+    } else {
+      let filteredCountries = allData.filter(function (data) {
+        return data.continent === e.target.value;
+      });
+      let countryNames = filteredCountries.map((el) => el.country);
+      setCountryArr(countryNames);
+    }
   };
 
   const handleCountryChange = (e) => {
-    setCountry(e.target.value);
+    setCountry(
+      allData.filter(function (el) {
+        return e.target.value === el.country;
+      })
+    );
   };
 
   return (
     <div className="Current">
-      <h1>World Cases</h1>
-      <p>Total Cases: {worldStats.length > 0 && worldStats[0].cases.total}</p>
-      <p>Total Deaths: {worldStats.length > 0 && worldStats[0].deaths.total}</p>
+      <header>
+        <h1>COVID-19: {country.length > 0 && country[0].country}</h1>
+        <div className="counter">
+          <h3>
+            <b>Total Cases: </b>
+            {country.length > 0 && country[0].cases.total.toLocaleString()}
+          </h3>
+          <h3>
+            <b>Total Deaths: </b>
+            {country.length > 0 && country[0].deaths.total.toLocaleString()}
+          </h3>
+        </div>
+        <div className="Filter">
+          <div>
+            {contArr.length > 0 && (
+              <Dropdown
+                key={continent}
+                label="Continent: "
+                arr={contArr}
+                value={continent}
+                onChange={handleContChange}
+              />
+            )}
+          </div>
 
-      {contArr.length > 0 && (
-        <Dropdown
-          label="Continent"
-          arr={contArr}
-          value={continent}
-          onChange={handleContChange}
-        />
-      )}
-
-      {countryArr.length > 0 && (
-        <Dropdown
-          label="Country"
-          arr={countryArr}
-          value={country}
-          onChange={handleCountryChange}
-        />
-      )}
-
+          <div>
+            {countryArr.length > 0 && (
+              <Dropdown
+                key={country.country}
+                label="Country: "
+                arr={countryArr}
+                value={country.country}
+                onChange={handleCountryChange}
+              />
+            )}
+          </div>
+        </div>
+      </header>
       {country.length > 0 && (
-        <Historical continent={continent} country={country} />
+        <Historical key={country[0].country} country={country[0].country} />
       )}
     </div>
   );
